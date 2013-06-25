@@ -1,5 +1,5 @@
 #
-SOURCES=boot.o main.o
+SOURCES=boot.o main.o monitor.o common.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -m32
 LDFLAGS=-melf_i386 -Tlink.ld
