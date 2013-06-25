@@ -5,6 +5,7 @@
 
 #include "monitor.h"
 #include "descriptor_tables.h"
+#include "timer.h"
 
 int main(struct multiboot *mboot_ptr)
 {
@@ -17,6 +18,9 @@ int main(struct multiboot *mboot_ptr)
 
 	asm volatile("int $0x3");
 	asm volatile("int $0x4");
+
+	asm volatile("sti");
+	init_timer(50);
 
 	return 0;
 }
