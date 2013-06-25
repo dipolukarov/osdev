@@ -34,7 +34,7 @@ mboot:
 [EXTERN main]				; This is the entry point of our C code
 
 start:
-	// Load multiboot information
+	; Load multiboot information:
 	push	ebx			;
 
 	; Execute the kernel:
