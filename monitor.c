@@ -1,5 +1,5 @@
 /**
- * monitor.c
+ * monitor.c	Defines functions for writing to the VGA controller.
  * @version $Id$
  */
 

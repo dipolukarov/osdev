@@ -1,5 +1,5 @@
 /**
- * monitor.h
+ * monitor.h	Defines the interface for monitor.h
  * @version $Id$
  */
 
