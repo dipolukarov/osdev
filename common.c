@@ -58,7 +58,7 @@ int strcmp(char *str1, char *str2)
 		i++;
 	}
 	// why did the loop exit ?
-	if ( (str1[i] == '\0' && str2[i] == '\0') || (str1[i] != '\0' && str2[i] != '\0') )
+	if ( (str1[i] == '\0' && str2[i] != '\0') || (str1[i] != '\0' && str2[i] == '\0') )
 		failed = 1;
 
 	return failed;
@@ -85,6 +85,14 @@ char *strcat(char *dest, const char *src)
 	while (*src != 0);
 
 	return dest;
+}
+
+int strlen(char *src)
+{
+	int i = 0;
+	while (*src++)
+		i++;
+	return i;
 }
 
 extern void panic(const char *message, const char *file, u32int line)

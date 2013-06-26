@@ -1,6 +1,6 @@
 #
 SOURCES=boot.o main.o monitor.o common.o descriptor_tables.o isr.o interrupt.o gdt.o timer.o \
-	kheap.o paging.o ordered_array.o
+	kheap.o paging.o ordered_array.o fs.o initrd.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -m32
 LDFLAGS=-melf_i386 -Tlink.ld
