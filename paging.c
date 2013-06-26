@@ -18,6 +18,7 @@ u32int nframes;
 
 // Defined in kheap.c
 extern u32int placement_address;
+extern heap_t *kheap;
 
 // Macros used in the bitset algorithms.
 #define INDEX_FROM_BIT(a)	(a/(8*4))
@@ -76,7 +77,6 @@ void alloc_frame(page_t *page, int is_kernel, int is_writeable)
 		u32int idx = first_frame();
 		if (idx == (u32int)-1) {
 			// PANIC! no free frames!!
-			PANIC("No free frames!");
 		}
 		set_frame(idx*0x1000);
 		page->present	= 1;
@@ -110,7 +110,17 @@ void initialise_paging()
 
 	// Let's make a page directory.
 	kernel_directory	= (page_directory_t*)kmalloc_a(sizeof(page_directory_t));
+	memset(kernel_directory, 0, sizeof(page_directory_t));
 	current_directory	= kernel_directory;
+
+	// Map some pages in the kernel heap area.
+	// Here we call get_page but not alloc_frame. This causes page_table_t's
+	// to be created where necessary.  We can't allocate frames yet bacause they
+	// need to be identity mapped first below, and yet we can't increase
+	// placement_address between identity mapping end enabling the heap!
+	int i = 0;
+	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000)
+		get_page(i, 1, kernel_directory);
 
 	// We need to identify map (phys addr = virt addr) from
 	// 0x0 to the end of used memory, so we can access this
@@ -119,17 +129,25 @@ void initialise_paging()
 	// inside the loop body we actually change placement_address
 	// by calling kmalloc(). A while loop causes this to be
 	// computed on-the-fly rather than once at the start.
-	int i = 0;
-	while (i < placement_address) {
+	i = 0;
+	while (i < placement_address + 0x1000) {
 		// Kernel code is readable but not writeable from userspace.
 		alloc_frame( get_page(i, 1, kernel_directory), 0, 0 );
 		i += 0x1000;
 	}
+
+	// Now allocate those pages we mapped earlier.
+	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000)
+		alloc_frame( get_page(i, 1, kernel_directory), 0, 0 );
+
 	// Before we enable paging, we must register our page fault handler.
 	register_interrupt_handler(14, page_fault);
 
 	// Now, enable paging!
 	switch_page_directory(kernel_directory);
+
+	// Initialise the kernel heap.
+	kheap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
 }
 
 void switch_page_directory(page_directory_t *dir)
